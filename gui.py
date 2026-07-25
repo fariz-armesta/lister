@@ -91,7 +91,12 @@ class App(tk.Tk):
         scrollbar.grid(row=10, column=2, sticky="ns")
         self.tree.configure(yscrollcommand=scrollbar.set)   
 
-        tk.Button(self, text="DELETE ALL", width=25, command=self.on_delete_all, bg="#3a3a3a", fg="#d55a1e", font=button_font).grid(row=13, column=0, columnspan=2)
+        delete_button_frame = tk.Frame(self, bg="#1e1e1e")
+        delete_button_frame.grid(row=13, column=0, columnspan=2, pady=5)
+
+        tk.Button(delete_button_frame, text="Delete Selected", command=self.delete_selected, bg="#3a3a3a", fg="#d55a1e", font=button_font).pack(side="left", padx=5)
+        tk.Button(delete_button_frame, text="Delete All", command=self.on_delete_all, bg="#3a3a3a", fg="#d55a1e", font=button_font).pack(side="left", padx=5)
+    
         tk.Button(self, text="COPY LINK", command=self.on_copy_link, bg="#3a3a3a", fg="#2bf0cf", font=button_font).grid(row=15, column=0, columnspan=2, pady=5)
 
         self.refresh_list()
@@ -120,6 +125,25 @@ class App(tk.Tk):
         if not confirm_msg:
             return
         self.db.delete_all_items()
+        self.refresh_list()
+
+    def delete_selected(self):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning("Nothing selected", "Select an item to delete first")
+            return
+
+        confirm_message = messagebox.askyesno(
+            "Delete Item",
+            "Delete this item permenantly?"
+        )
+        if not confirm_message:
+            return
+
+        item_values = self.tree.item(selected[0])["values"]
+        item_id = item_values[0]
+
+        self.db.delete_item(item_id)
         self.refresh_list()
 
     def on_copy_link(self):
@@ -157,6 +181,6 @@ class App(tk.Tk):
 
     def on_close(self):
         sfx_path = os.path.join(os.path.dirname(__file__), "sfx", "close.wav")
-        winsound.PlaySound(sfx_path, winsound.SND_FILENAME | winsound.SND_SYNC)
+        winsound.PlaySound(sfx_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
         self.db.close()
-        self.destroy()
+        self.after(500, self.destroy)

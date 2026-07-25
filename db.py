@@ -46,5 +46,13 @@ class Database:
         self.conn.execute("DELETE FROM sqlite_sequence WHERE name='lists'")
         self.conn.commit()
 
+    def delete_item(self, item_id):
+        query = """
+        DELETE FROM lists
+        WHERE id = ?
+        """
+        self.conn.execute(query, (item_id,))
+        self.conn.commit()
+
     def close(self):
         self.conn.close()
