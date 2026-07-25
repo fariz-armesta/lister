@@ -5,10 +5,15 @@ import ctypes
 import os
 import winsound
 
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         FONT_PATH = os.path.join(os.path.dirname(__file__), "fonts", "ArchivoBlack-Regular.ttf")
+        self.icon_image = tk.PhotoImage(file=os.path.join(os.path.dirname(__file__), "icons", "icon.gif"))
+        icon_path = os.path.join(os.path.dirname(__file__), "icons", "icon.ico")
+        self.iconbitmap(icon_path)
+        self.iconphoto(True, self.icon_image)
         self.load_font(FONT_PATH)
         self.title("Lister")
         self.configure(bg="#1e1e1e")
@@ -115,8 +120,7 @@ class App(tk.Tk):
             self.tree.delete(item)                       
         for row in self.db.get_all_items():
             self.tree.insert("", tk.END, values=(row["id"], row["title"], row["descriptions"], row["time"]))
-            # CHANGED: was `self
-
+            
     def on_delete_all(self):
         confirm_msg = messagebox.askyesno(
             "Delete All",
@@ -125,6 +129,10 @@ class App(tk.Tk):
         if not confirm_msg:
             return
         self.db.delete_all_items()
+
+        sfx_path = os.path.join(os.path.dirname(__file__), "sfx", "delete.wav")
+        winsound.PlaySound(sfx_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+        
         self.refresh_list()
 
     def delete_selected(self):
@@ -144,6 +152,9 @@ class App(tk.Tk):
         item_id = item_values[0]
 
         self.db.delete_item(item_id)
+        sfx_path = os.path.join(os.path.dirname(__file__), "sfx", "delete.wav")
+        winsound.PlaySound(sfx_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+
         self.refresh_list()
 
     def on_copy_link(self):
