@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from db import Database
 import ctypes
 import os
+import winsound
 
 class App(tk.Tk):
     def __init__(self):
@@ -146,11 +147,16 @@ class App(tk.Tk):
         self.link_name.delete(0, tk.END)
         self.refresh_list()
 
+        sfx_path = os.path.join(os.path.dirname(__file__), "sfx", "input.wav")
+        winsound.PlaySound(sfx_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+
     def load_font(self, path):
         FR_PRIVATE = 0x10
         path = os.path.abspath(path)
         ctypes.windll.gdi32.AddFontResourceExW(path, FR_PRIVATE, 0)
 
     def on_close(self):
+        sfx_path = os.path.join(os.path.dirname(__file__), "sfx", "close.wav")
+        winsound.PlaySound(sfx_path, winsound.SND_FILENAME | winsound.SND_SYNC)
         self.db.close()
         self.destroy()
