@@ -38,5 +38,12 @@ class Database:
         """
         return self.conn.execute(query).fetchall()
 
+    def delete_all_items(self):
+        query = """
+        DELETE FROM lists
+        """
+        self.conn.execute(query)
+        self.conn.commit()
+
     def close(self):
         self.conn.close()

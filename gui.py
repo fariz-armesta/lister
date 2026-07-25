@@ -36,6 +36,8 @@ class App(tk.Tk):
 
         self.listbox.config(yscrollcommand=self.scrollbar.set)
 
+        tk.Button(self, text="Delete All", width = 25, command=self.on_delete_all).grid(row=13, column=0, columnspan=2)
+
         self.refresh_list()
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -46,8 +48,17 @@ class App(tk.Tk):
             display_text = f"[{row['id']}] {row['title']} — {row['descriptions']} ({row['time']})"
             self.listbox.insert(tk.END, display_text)
 
+    def on_delete_all(self):
+        confirm_msg = messagebox.askyesno(
+            "Delete All",
+            "Are you sure you want to delete all items?"
+        )
+        if not confirm_msg:
+            return
+        self.db.delete_all_items()
+        self.refresh_list()
+
     def on_input(self):
-        print(self.link.get(), self.link_name.get())
         link = self.link.get().strip()
         desc = self.link_name.get().strip() 
 
