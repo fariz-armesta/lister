@@ -1,33 +1,75 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from db import Database
+import ctypes
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Lister")
-        self.geometry("720x720")
+        self.configure(bg="#1e1e1e")
+        width, height = 720, 720
+        self.center_window(width, height)
 
         self.db = Database()
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        tk.Label(self, text="Lister for making list!").grid(row=0, column=0, columnspan=2)
+        title_font = ("Segoe UI", 14, "bold")
+        label_font = ("Segoe UI", 10, "bold")
+        button_font = ("Segoe UI", 10, "bold")
 
-        tk.Label(self, text="Link: ").grid(row=2, column=0)
-        tk.Label(self, text="Desc: ").grid(row=5, column=0)
+        tk.Label(self, text="Lister for making list!", bg="#1e1e1e", fg="#d55a1e", font=title_font).grid(row=0, column=0, columnspan=2)
 
-        self.link = tk.Entry(self)
+
+        self.link = tk.Entry(self, bg="#2d2d2d", fg="white", insertbackground="white", width=70)
         self.link.grid(row=2, column=1)
 
-        self.link_name = tk.Entry(self)
+        self.link_name = tk.Entry(self, bg="#2d2d2d", fg="white", insertbackground="white", width=70)
         self.link_name.grid(row=5, column=1)
 
-        tk.Button(self, text="Input", width = 25, command=self.on_input).grid(row=7, column=0, columnspan=2)
+        tk.Label(self, text="Link: ", bg="#1e1e1e", fg="#2bf0cf", font=label_font).grid(row=2, column=0, sticky="e", padx=(0, 5))
+        self.link.grid(row=2, column=1, sticky="w")
+
+        tk.Label(self, text="Desc: ", bg="#1e1e1e", fg="#2bf0cf", font=label_font).grid(row=5, column=0, sticky="e", padx=(0, 5))
+        self.link_name.grid(row=5, column=1, sticky="w")
+
+        tk.Button(self, text="Input", width=25, command=self.on_input, bg="#3a3a3a", fg="#2bf0cf", font=button_font).grid(row=7, column=0, columnspan=2)
+        self.bind("<Return>", lambda event: self.on_input())
+
+        style = ttk.Style()
+        style.theme_use("clam")   # "clam" theme allows more customization than the default
+
+        style.configure("Treeview",
+            background="#2d2d2d",
+            foreground="#2bf0cf",
+            fieldbackground="#2d2d2d",
+            bordercolor="#2d2d2d",
+            lightcolor="#2d2d2d",
+            darkcolor="#2d2d2d",
+            rowheight=25,
+            font=("Segoe UI", 10)
+        )
+
+        style.configure("Treeview.Heading",
+            background="#3a3a3a",
+            foreground="#d55a1e",
+            bordercolor="#3a3a3a",
+            lightcolor="#3a3a3a",
+            darkcolor="#3a3a3a",
+            font=("Segoe UI", 10, "bold")
+        )
+
+        style.map("Treeview",
+            background=[("selected", "#4a6984")],
+            foreground=[("selected", "white")]
+        )
+
+        style.layout("Treeview", [("Treeview.treearea", {"sticky": "nswe"})])
 
         column = ("id", "title", "descriptions", "time")
-        self.tree = ttk.Treeview(self, columns=column, show="headings", height=12)
+        self.tree = ttk.Treeview(self, columns=column, show="headings", height=15)
 
         self.tree.heading("id", text="ID")
         self.tree.heading("title", text="Link")
@@ -45,13 +87,19 @@ class App(tk.Tk):
         scrollbar.grid(row=10, column=2, sticky="ns")
         self.tree.configure(yscrollcommand=scrollbar.set)   
 
-        tk.Button(self, text="Delete All", width = 25, command=self.on_delete_all).grid(row=13, column=0, columnspan=2)
-
-        tk.Button(self, text="Copy Link", command=self.on_copy_link).grid(row=15, column=0, columnspan=2, pady=5)
+        tk.Button(self, text="Delete All", width=25, command=self.on_delete_all, bg="#3a3a3a", fg="#d55a1e", font=button_font).grid(row=13, column=0, columnspan=2)
+        tk.Button(self, text="Copy Link", command=self.on_copy_link, bg="#3a3a3a", fg="#2bf0cf", font=button_font).grid(row=15, column=0, columnspan=2, pady=5)
 
         self.refresh_list()
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def center_window(self, width, height):
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        self.geometry(f"{width}x{height}+{x}+{y}")
 
     def refresh_list(self):
         for item in self.tree.get_children():           
