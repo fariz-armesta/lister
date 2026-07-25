@@ -47,6 +47,7 @@ lister/
 - [ ] Export/import saved links as CSV
 - [ ] Package as a standalone `.exe` with PyInstaller
 - [ ] Multiple database table selections
+- [ ] Turn it into .exe 
 
 ## Running Locally
 
