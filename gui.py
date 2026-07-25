@@ -2,10 +2,13 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from db import Database
 import ctypes
+import os
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+        FONT_PATH = os.path.join(os.path.dirname(__file__), "fonts", "ArchivoBlack-Regular.ttf")
+        self.load_font(FONT_PATH)
         self.title("Lister")
         self.configure(bg="#1e1e1e")
         width, height = 720, 720
@@ -16,11 +19,11 @@ class App(tk.Tk):
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        title_font = ("Segoe UI", 14, "bold")
-        label_font = ("Segoe UI", 10, "bold")
-        button_font = ("Segoe UI", 10, "bold")
+        title_font = ("Archivo Black", 14)
+        label_font = ("Archivo Black", 10)
+        button_font = ("Archivo Black", 10)
 
-        tk.Label(self, text="Lister for making list!", bg="#1e1e1e", fg="#d55a1e", font=title_font).grid(row=0, column=0, columnspan=2)
+        tk.Label(self, text="Lister the List Maker", bg="#f3921d", fg="#212c30", font=title_font).grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0, 15))
 
 
         self.link = tk.Entry(self, bg="#2d2d2d", fg="white", insertbackground="white", width=70)
@@ -29,17 +32,17 @@ class App(tk.Tk):
         self.link_name = tk.Entry(self, bg="#2d2d2d", fg="white", insertbackground="white", width=70)
         self.link_name.grid(row=5, column=1)
 
-        tk.Label(self, text="Link: ", bg="#1e1e1e", fg="#2bf0cf", font=label_font).grid(row=2, column=0, sticky="e", padx=(0, 5))
+        tk.Label(self, text="LINK: ", bg="#1e1e1e", fg="#2bf0cf", font=label_font).grid(row=2, column=0, sticky="e", padx=(0, 5))
         self.link.grid(row=2, column=1, sticky="w")
 
-        tk.Label(self, text="Desc: ", bg="#1e1e1e", fg="#2bf0cf", font=label_font).grid(row=5, column=0, sticky="e", padx=(0, 5))
+        tk.Label(self, text="DESC: ", bg="#1e1e1e", fg="#2bf0cf", font=label_font).grid(row=5, column=0, sticky="e", padx=(0, 5))
         self.link_name.grid(row=5, column=1, sticky="w")
 
-        tk.Button(self, text="Input", width=25, command=self.on_input, bg="#3a3a3a", fg="#2bf0cf", font=button_font).grid(row=7, column=0, columnspan=2)
+        tk.Button(self, text="INPUT", width=25, command=self.on_input, bg="#3a3a3a", fg="#2bf0cf", font=button_font).grid(row=7, column=0, columnspan=2)
         self.bind("<Return>", lambda event: self.on_input())
 
         style = ttk.Style()
-        style.theme_use("clam")   # "clam" theme allows more customization than the default
+        style.theme_use("clam") 
 
         style.configure("Treeview",
             background="#2d2d2d",
@@ -72,9 +75,9 @@ class App(tk.Tk):
         self.tree = ttk.Treeview(self, columns=column, show="headings", height=15)
 
         self.tree.heading("id", text="ID")
-        self.tree.heading("title", text="Link")
-        self.tree.heading("descriptions", text="Description")
-        self.tree.heading("time", text="Date")
+        self.tree.heading("title", text="LINK")
+        self.tree.heading("descriptions", text="DESCRIPTION")
+        self.tree.heading("time", text="DATE")
 
         self.tree.column("id", width=30, anchor="center")
         self.tree.column("title", width=200)
@@ -87,8 +90,8 @@ class App(tk.Tk):
         scrollbar.grid(row=10, column=2, sticky="ns")
         self.tree.configure(yscrollcommand=scrollbar.set)   
 
-        tk.Button(self, text="Delete All", width=25, command=self.on_delete_all, bg="#3a3a3a", fg="#d55a1e", font=button_font).grid(row=13, column=0, columnspan=2)
-        tk.Button(self, text="Copy Link", command=self.on_copy_link, bg="#3a3a3a", fg="#2bf0cf", font=button_font).grid(row=15, column=0, columnspan=2, pady=5)
+        tk.Button(self, text="DELETE ALL", width=25, command=self.on_delete_all, bg="#3a3a3a", fg="#d55a1e", font=button_font).grid(row=13, column=0, columnspan=2)
+        tk.Button(self, text="COPY LINK", command=self.on_copy_link, bg="#3a3a3a", fg="#2bf0cf", font=button_font).grid(row=15, column=0, columnspan=2, pady=5)
 
         self.refresh_list()
 
@@ -142,6 +145,11 @@ class App(tk.Tk):
         self.link.delete(0, tk.END)
         self.link_name.delete(0, tk.END)
         self.refresh_list()
+
+    def load_font(self, path):
+        FR_PRIVATE = 0x10
+        path = os.path.abspath(path)
+        ctypes.windll.gdi32.AddFontResourceExW(path, FR_PRIVATE, 0)
 
     def on_close(self):
         self.db.close()
