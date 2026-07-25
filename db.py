@@ -38,6 +38,15 @@ class Database:
         """
         return self.conn.execute(query).fetchall()
 
+    def search_items(self, query):
+        search_term = f"%{query}%"
+        sql = """
+        SELECT * FROM lists
+        WHERE title LIKE ? OR descriptions LIKE ?
+        ORDER BY id DESC
+        """
+        return self.conn.execute(sql, (search_term, search_term)).fetchall()
+
     def delete_all_items(self):
         query = """
         DELETE FROM lists

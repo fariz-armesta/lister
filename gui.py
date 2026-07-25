@@ -47,6 +47,17 @@ class App(tk.Tk):
         tk.Button(self, text="INPUT", width=25, command=self.on_input, bg="#3a3a3a", fg="#2bf0cf", font=button_font).grid(row=7, column=0, columnspan=2)
         self.bind("<Return>", lambda event: self.on_input())
 
+        search_frame = tk.Frame(self, bg="#1e1e1e")
+        search_frame.grid(row=8, column=0, columnspan=2, pady=(10, 5))
+
+        tk.Label(search_frame, text="Search: ", bg="#1e1e1e", fg="#2bf0cf", font=label_font).pack(side="left")
+
+        self.search_var = tk.StringVar()
+        self.search_var.trace_add("write", self.on_search)  
+
+        self.search_entry = tk.Entry(search_frame, textvariable=self.search_var, bg="#2d2d2d", fg="white", insertbackground="white", width=40)
+        self.search_entry.pack(side="left", padx=5)
+
         style = ttk.Style()
         style.theme_use("clam") 
 
@@ -132,7 +143,7 @@ class App(tk.Tk):
 
         sfx_path = os.path.join(os.path.dirname(__file__), "sfx", "delete.wav")
         winsound.PlaySound(sfx_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
-        
+
         self.refresh_list()
 
     def delete_selected(self):
@@ -189,6 +200,20 @@ class App(tk.Tk):
         FR_PRIVATE = 0x10
         path = os.path.abspath(path)
         ctypes.windll.gdi32.AddFontResourceExW(path, FR_PRIVATE, 0)
+
+    def on_search(self, *args):
+        query = self.search_var.get().strip().lower()
+
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        if query:
+            rows = self.db.search_items(query)
+        else:
+            rows = self.db.get_all_items()
+
+        for row in rows:
+            self.tree.insert("", tk.END, values=(row["id"], row["title"], row["descriptions"], row["time"]))
 
     def on_close(self):
         sfx_path = os.path.join(os.path.dirname(__file__), "sfx", "close.wav")
