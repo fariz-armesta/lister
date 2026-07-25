@@ -124,6 +124,8 @@ class App(tk.Tk):
     
         tk.Button(self, text="COPY LINK", command=self.on_copy_link, bg="#3a3a3a", fg="#2bf0cf", font=button_font).grid(row=15, column=0, columnspan=2, pady=5)
 
+        tk.Label(self, text="Note: Double click to update a record", bg="#1e1e1e", fg="#f3921d", font=label_font).grid(row=16, column=0, columnspan=2, pady=5)
+
         self.refresh_list()
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
