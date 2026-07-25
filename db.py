@@ -63,5 +63,14 @@ class Database:
         self.conn.execute(query, (item_id,))
         self.conn.commit()
 
+    def update_item(self, item_id, title, descriptions):
+        query = """
+        UPDATE lists
+        SET title = ?, descriptions = ?
+        WHERE id = ?
+        """
+        self.conn.execute(query, (title, descriptions, item_id))
+        self.conn.commit()
+
     def close(self):
         self.conn.close()

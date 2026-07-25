@@ -21,6 +21,7 @@ class App(tk.Tk):
         self.center_window(width, height)
 
         self.db = Database()
+        self.editing_id = None
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -44,8 +45,15 @@ class App(tk.Tk):
         tk.Label(self, text="DESC: ", bg="#1e1e1e", fg="#2bf0cf", font=label_font).grid(row=5, column=0, sticky="e", padx=(0, 5))
         self.link_name.grid(row=5, column=1, sticky="w")
 
-        tk.Button(self, text="INPUT", width=25, command=self.on_input, bg="#3a3a3a", fg="#2bf0cf", font=button_font).grid(row=7, column=0, columnspan=2)
+        input_button_frame = tk.Frame(self, bg="#1e1e1e")
+        input_button_frame.grid(row=7, column=0, columnspan=2, pady=5)
+
+        self.input_button = tk.Button(input_button_frame, text="INPUT", width=25, command=self.on_input, bg="#3a3a3a", fg="#2bf0cf", font=button_font)
+        self.input_button.pack(side="left", padx=5)
+
+        tk.Button(input_button_frame, text="CANCEL", command=self.cancel_edit, bg="#3a3a3a", fg="#2bf0cf", font=button_font).pack(side="left", padx=5)
         self.bind("<Return>", lambda event: self.on_input())
+        
 
         search_frame = tk.Frame(self, bg="#1e1e1e")
         search_frame.grid(row=8, column=0, columnspan=2, pady=(10, 5))
@@ -90,6 +98,7 @@ class App(tk.Tk):
 
         column = ("id", "title", "descriptions", "time")
         self.tree = ttk.Treeview(self, columns=column, show="headings", height=15)
+        self.tree.bind("<Double-1>", self.on_row_select_for_edit)
 
         self.tree.heading("id", text="ID")
         self.tree.heading("title", text="LINK")
@@ -182,19 +191,24 @@ class App(tk.Tk):
 
     def on_input(self):
         link = self.link.get().strip()
-        desc = self.link_name.get().strip() 
+        desc = self.link_name.get().strip()
 
         if not link or not desc:
             messagebox.showerror("Error", "Please fill in both fields")
             return
 
-        self.db.add_item(link, desc)
+        if self.editing_id is not None:
+            self.db.update_item(self.editing_id, link, desc)
+            self.editing_id = None
+            self.input_button.config(text="Input")
+        else:
+            self.db.add_item(link, desc)
+            sfx_path = os.path.join(os.path.dirname(__file__), "sfx", "input.wav")
+            winsound.PlaySound(sfx_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+
         self.link.delete(0, tk.END)
         self.link_name.delete(0, tk.END)
         self.refresh_list()
-
-        sfx_path = os.path.join(os.path.dirname(__file__), "sfx", "input.wav")
-        winsound.PlaySound(sfx_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
 
     def load_font(self, path):
         FR_PRIVATE = 0x10
@@ -214,6 +228,29 @@ class App(tk.Tk):
 
         for row in rows:
             self.tree.insert("", tk.END, values=(row["id"], row["title"], row["descriptions"], row["time"]))
+
+    def on_row_select_for_edit(self, event):
+        selected = self.tree.selection()
+        if not selected:
+            return
+
+        item_values = self.tree.item(selected[0])["values"]
+        item_id, title, descriptions = item_values[0], item_values[1], item_values[2]
+
+        self.link.delete(0, tk.END)
+        self.link.insert(0, title)
+
+        self.link_name.delete(0, tk.END)
+        self.link_name.insert(0, descriptions)
+
+        self.editing_id = item_id
+        self.input_button.config(text="Update")
+
+    def cancel_edit(self):
+        self.editing_id = None
+        self.link.delete(0, tk.END)
+        self.link_name.delete(0, tk.END)
+        self.input_button.config(text="Input")
 
     def on_close(self):
         sfx_path = os.path.join(os.path.dirname(__file__), "sfx", "close.wav")
